@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.database.db import Base, engine
-from backend.app.api.auth import router as auth_router
-from backend.app.api.jobs import router as jobs_router
-from backend.app.api.resumes import router as resumes_router
+from app.database.db import Base, engine
+from app.api.auth import router as auth_router
+from app.api.jobs import router as jobs_router
+from app.api.resumes import router as resumes_router
 
 # Create DB tables automatically on startup
 Base.metadata.create_all(bind=engine)
@@ -17,7 +17,13 @@ app = FastAPI(
 # CORS Middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ],
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,4 +44,4 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

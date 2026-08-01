@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.5.7",
     "@prisma/client": "^6.19.3",
     "@supabase/supabase-js": "^2.111.0",
+    "@tanstack/react-query": "^5.101.4",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "jsonwebtoken": "^9.0.3",
@@ -20,7 +22,9 @@
     "pdf-parse": "^2.4.5",
     "react": "^18",
     "react-dom": "^18",
-    "tailwind-merge": "^3.6.0"
+    "react-hook-form": "^7.83.0",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

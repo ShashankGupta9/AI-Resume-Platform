@@ -13,7 +13,8 @@ import {
   LogOut,
   Menu,
   X,
-  Building2
+  Building2,
+  Settings
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -80,7 +81,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-3 pl-3 border-l border-slate-800">
-                <div className="flex items-center gap-2.5 bg-slate-900/90 border border-slate-800 rounded-full py-1.5 px-3">
+                <Link href="/profile" className="flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 rounded-full py-1.5 px-3 transition-colors">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow">
                     {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'R'}
                   </div>
@@ -93,7 +94,15 @@ export default function Navbar() {
                       {user.companyName || 'Recruitment Corp'}
                     </span>
                   </div>
-                </div>
+                </Link>
+
+                <Link
+                  href="/settings"
+                  className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-xl transition-all"
+                  title="Account Settings"
+                >
+                  <Settings className="w-4 h-4" />
+                </Link>
 
                 <button
                   onClick={() => logout()}

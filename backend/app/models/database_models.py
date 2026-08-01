@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.app.database.db import Base
+from app.database.db import Base
 
 def generate_uuid():
     return str(uuid.uuid4())
@@ -11,14 +11,47 @@ class Recruiter(Base):
     __tablename__ = "recruiters"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    fullName = Column(String(255), nullable=False)
-    companyName = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=False)
+    company_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    password = Column(String(255), nullable=False)
-    createdAt = Column(DateTime, default=datetime.utcnow)
-    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    password_hash = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     jobs = relationship("Job", back_populates="recruiter", cascade="all, delete-orphan")
+
+    # Property Aliases for clean backward compatibility
+    @property
+    def fullName(self):
+        return self.full_name
+
+    @fullName.setter
+    def fullName(self, value):
+        self.full_name = value
+
+    @property
+    def companyName(self):
+        return self.company_name
+
+    @companyName.setter
+    def companyName(self, value):
+        self.company_name = value
+
+    @property
+    def password(self):
+        return self.password_hash
+
+    @password.setter
+    def password(self, value):
+        self.password_hash = value
+
+    @property
+    def createdAt(self):
+        return self.created_at
+
+    @property
+    def updatedAt(self):
+        return self.updated_at
 
 class Job(Base):
     __tablename__ = "jobs"

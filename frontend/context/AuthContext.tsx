@@ -9,7 +9,7 @@ interface AuthContextType {
   user: Recruiter | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (fullName: string, companyName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (data: { full_name: string; company_name: string; email: string; password: string; confirm_password: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const recruiter = await apiService.getMe();
       setUser(recruiter);
     } catch {
-      // Fallback for local demo state
+      // Demo fallback for unauthenticated local preview
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (token) {
         setUser({
@@ -59,14 +59,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return { success: true };
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'Login failed';
+      const errorMsg = err instanceof Error ? err.message : 'Invalid email or password';
       return { success: false, error: errorMsg };
     }
   };
 
-  const register = async (fullName: string, companyName: string, email: string, password: string) => {
+  const register = async (data: { full_name: string; company_name: string; email: string; password: string; confirm_password: string }) => {
     try {
-      const res = await apiService.register({ fullName, companyName, email, password });
+      const res = await apiService.register(data);
       setUser(res.user);
       if (typeof window !== 'undefined') {
         localStorage.setItem('token', res.token);
@@ -80,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      await apiService.logout();
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
       }

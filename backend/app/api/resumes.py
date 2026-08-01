@@ -2,12 +2,12 @@ import json
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from backend.app.database.db import get_db
-from backend.app.models.database_models import Resume, Job, Recruiter
-from backend.app.schemas.pydantic_schemas import ResumeResponse, JobResponse
-from backend.app.services.ai_matcher import analyze_resume_file
-from backend.app.services.storage_service import save_resume_file
-from backend.app.utils.security import get_current_recruiter
+from app.database.db import get_db
+from app.models.database_models import Resume, Job, Recruiter
+from app.schemas.pydantic_schemas import ResumeResponse, JobResponse
+from app.services.ai_matcher import analyze_resume_file
+from app.services.storage_service import save_resume_file
+from app.utils.security import get_current_recruiter
 
 router = APIRouter(prefix="/api/resumes", tags=["Resumes"])
 

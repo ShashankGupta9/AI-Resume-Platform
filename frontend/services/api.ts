@@ -8,7 +8,6 @@ class ApiService {
       'Content-Type': 'application/json',
     };
     
-    // Attach authorization header if stored in localStorage/cookie
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token) {
@@ -19,12 +18,14 @@ class ApiService {
   }
 
   // AUTH API
-  async register(data: { fullName: string; companyName: string; email: string; password: string }): Promise<AuthResponse> {
+  async register(data: { full_name: string; company_name: string; email: string; password: string; confirm_password: string }): Promise<AuthResponse> {
     const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
+
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.detail || err.error || 'Registration failed');
@@ -36,18 +37,28 @@ class ApiService {
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
+
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.detail || err.error || 'Login failed');
+      throw new Error(err.detail || err.error || 'Invalid credentials');
     }
     return res.json();
+  }
+
+  async logout(): Promise<void> {
+    await fetch(`${API_BASE_URL}/api/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
   }
 
   async getMe(): Promise<Recruiter> {
     const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: this.getHeaders(),
+      credentials: 'include',
     });
     if (!res.ok) {
       throw new Error('Not authenticated');
@@ -56,10 +67,23 @@ class ApiService {
     return data.user;
   }
 
+  async verifyToken(): Promise<boolean> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/verify`, {
+        headers: this.getHeaders(),
+        credentials: 'include',
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
   // JOBS API
   async getJobs(): Promise<Job[]> {
     const res = await fetch(`${API_BASE_URL}/api/jobs`, {
       headers: this.getHeaders(),
+      credentials: 'include',
     });
     if (!res.ok) throw new Error('Failed to fetch jobs');
     const data = await res.json();
@@ -69,6 +93,7 @@ class ApiService {
   async getJobById(id: string): Promise<Job> {
     const res = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
       headers: this.getHeaders(),
+      credentials: 'include',
     });
     if (!res.ok) throw new Error('Failed to fetch job details');
     const data = await res.json();
@@ -79,6 +104,7 @@ class ApiService {
     const res = await fetch(`${API_BASE_URL}/api/jobs`, {
       method: 'POST',
       headers: this.getHeaders(),
+      credentials: 'include',
       body: JSON.stringify(jobData),
     });
     if (!res.ok) {
@@ -97,6 +123,7 @@ class ApiService {
 
     const res = await fetch(url.toString(), {
       headers: this.getHeaders(),
+      credentials: 'include',
     });
     if (!res.ok) throw new Error('Failed to fetch candidate resumes');
     const data = await res.json();
@@ -113,6 +140,7 @@ class ApiService {
     const res = await fetch(`${API_BASE_URL}/api/resumes`, {
       method: 'POST',
       headers,
+      credentials: 'include',
       body: formData,
     });
 
@@ -127,6 +155,7 @@ class ApiService {
     const res = await fetch(`${API_BASE_URL}/api/resumes/${id}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
+      credentials: 'include',
     });
     if (!res.ok) throw new Error('Failed to delete candidate resume');
   }

@@ -1,51 +1,61 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui/Toast';
-import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, Zap } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, LoginFormData } from '@/lib/validation';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
+import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, Zap, AlertCircle } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginContent() {
   const { login } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const redirectUrl = searchParams.get('redirect') || '/dashboard';
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      showToast('error', 'Validation Error', 'Please enter your email address and password.');
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-    setIsSubmitting(true);
-    const res = await login(email, password);
-    setIsSubmitting(false);
+  const onSubmit = async (data: LoginFormData) => {
+    setAuthError(null);
+    const res = await login(data.email, data.password);
 
     if (res.success) {
       showToast('success', 'Welcome Back!', 'Logged in successfully as recruiter.');
-      router.push('/dashboard');
+      router.push(redirectUrl);
     } else {
-      showToast('error', 'Authentication Failed', res.error || 'Invalid credentials.');
+      const msg = res.error || 'Invalid email or password.';
+      setAuthError(msg);
+      showToast('error', 'Authentication Failed', msg);
     }
   };
 
   const handleDemoLogin = async () => {
-    setEmail('demo@recruiter.com');
-    setPassword('password123');
-    setIsSubmitting(true);
+    setAuthError(null);
+    setValue('email', 'demo@recruiter.com');
+    setValue('password', 'password123');
+    
     const res = await login('demo@recruiter.com', 'password123');
-    setIsSubmitting(false);
-
     if (res.success) {
       showToast('success', 'Demo Session Loaded', 'Signed in with demo recruiter credentials.');
-      router.push('/dashboard');
+      router.push(redirectUrl);
     } else {
       showToast('error', 'Login Error', res.error || 'Could not sign in with demo account.');
     }
@@ -54,7 +64,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6">
       <div className="max-w-md w-full space-y-8 glass-panel p-8 sm:p-10 rounded-3xl shadow-2xl border border-slate-800 relative overflow-hidden">
-        {/* Top Glow Accent */}
+        {/* Top Glow Accents */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -67,31 +77,39 @@ export default function LoginPage() {
             Recruiter Login
           </h2>
           <p className="text-sm text-slate-400">
-            Access your hiring dashboard, candidate match reports, and job listings.
+            Sign in to access your recruitment portal, candidate evaluations, and job requisitions.
           </p>
         </div>
 
-        {/* Quick Demo Login Banner */}
+        {/* One-Click Demo Banner */}
         <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <Zap className="w-5 h-5 text-cyan-400 shrink-0" />
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-200">Want a instant trial?</span>
-              <span className="text-[11px] text-slate-400">Use pre-loaded demo account</span>
+              <span className="text-xs font-semibold text-slate-200">Instant Preview?</span>
+              <span className="text-[11px] text-slate-400">Sign in with demo recruiter account</span>
             </div>
           </div>
           <button
             type="button"
             onClick={handleDemoLogin}
             disabled={isSubmitting}
-            className="px-3 py-1.5 text-xs font-semibold text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded-xl transition-all"
+            className="px-3 py-1.5 text-xs font-semibold text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded-xl transition-all shrink-0"
           >
             One-Click Demo
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        {/* General Auth Error Alert */}
+        {authError && (
+          <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-200 text-xs flex items-center gap-2.5 animate-in fade-in">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <span>{authError}</span>
+          </div>
+        )}
+
+        {/* Form with React Hook Form + Zod */}
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Work Email Address
@@ -102,13 +120,18 @@ export default function LoginPage() {
               </div>
               <input
                 type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register('email')}
                 placeholder="recruiter@company.com"
-                className="w-full pl-10 pr-4 py-3 bg-slate-900/80 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                className={`w-full pl-10 pr-4 py-3 bg-slate-900/80 border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                  errors.email
+                    ? 'border-rose-500/60 focus:ring-rose-500/50'
+                    : 'border-slate-800 focus:ring-indigo-500/50 focus:border-indigo-500'
+                }`}
               />
             </div>
+            {errors.email && (
+              <p className="text-[11px] text-rose-400 mt-1 font-medium">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
@@ -121,11 +144,13 @@ export default function LoginPage() {
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-10 py-3 bg-slate-900/80 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                className={`w-full pl-10 pr-10 py-3 bg-slate-900/80 border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
+                  errors.password
+                    ? 'border-rose-500/60 focus:ring-rose-500/50'
+                    : 'border-slate-800 focus:ring-indigo-500/50 focus:border-indigo-500'
+                }`}
               />
               <button
                 type="button"
@@ -135,6 +160,9 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-[11px] text-rose-400 mt-1 font-medium">{errors.password.message}</p>
+            )}
           </div>
 
           <button
@@ -153,7 +181,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Footer link */}
+        {/* Footer */}
         <div className="text-center pt-2 text-xs text-slate-400">
           New recruiter?{' '}
           <Link href="/register" className="font-semibold text-cyan-400 hover:underline">
@@ -162,5 +190,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-12 text-slate-400">Loading authentication form...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

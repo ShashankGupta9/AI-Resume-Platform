@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.app.database.db import get_db
-from backend.app.models.database_models import Job, Recruiter, Resume
-from backend.app.schemas.pydantic_schemas import JobCreate, JobResponse
-from backend.app.utils.security import get_current_recruiter
+from app.database.db import get_db
+from app.models.database_models import Job, Recruiter, Resume
+from app.schemas.pydantic_schemas import JobCreate, JobResponse
+from app.utils.security import get_current_recruiter
 
 router = APIRouter(prefix="/api/jobs", tags=["Jobs"])
 
