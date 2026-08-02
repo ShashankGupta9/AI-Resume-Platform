@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Jobs', href: '/jobs', icon: Briefcase },
+    { name: 'Jobs Requisitions', href: '/dashboard/jobs', icon: Briefcase },
     { name: 'Upload Resume', href: '/resumes/upload', icon: Upload },
     { name: 'Candidates', href: '/resumes', icon: Users },
   ];

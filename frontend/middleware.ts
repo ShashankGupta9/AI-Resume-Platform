@@ -3,7 +3,6 @@ import type { NextRequest } from 'next/server';
 
 const PROTECTED_ROUTES = [
   '/dashboard',
-  '/jobs',
   '/resumes',
   '/profile',
   '/settings',
@@ -14,6 +13,11 @@ const AUTH_ROUTES = ['/login', '/register'];
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get('access_token')?.value || req.cookies.get('token')?.value;
+
+  // Legacy route redirect: /jobs -> /dashboard/jobs
+  if (pathname === '/jobs') {
+    return NextResponse.redirect(new URL('/dashboard/jobs', req.url));
+  }
 
   const isProtectedRoute = PROTECTED_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
