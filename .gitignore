@@ -7,6 +7,8 @@ out/
 
 # environment
 .env
+.env.*
+!.env.example
 .env.local
 .env.production
 
@@ -23,3 +25,7 @@ Thumbs.db
 # build
 dist/
 coverage/
+
+# Python
+__pycache__/
+*.pyc

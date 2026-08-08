@@ -8,11 +8,20 @@ SQLITE_DATABASE_URL = "sqlite:///./resume_ai.db"
 
 database_url = (settings.DATABASE_URL or "").strip()
 
+
 if database_url:
-    # Production / Supabase PostgreSQL
+
+    # PostgreSQL / Supabase
     if database_url.startswith("postgres://"):
         database_url = database_url.replace(
             "postgres://",
+            "postgresql+psycopg://",
+            1,
+        )
+
+    elif database_url.startswith("postgresql://"):
+        database_url = database_url.replace(
+            "postgresql://",
             "postgresql+psycopg://",
             1,
         )
@@ -25,6 +34,7 @@ if database_url:
     print("[DB] Using PostgreSQL database")
 
 else:
+
     # Local development
     engine = create_engine(
         SQLITE_DATABASE_URL,
