@@ -79,6 +79,33 @@ class JobResponse(BaseModel):
     updated_at: datetime
     applicant_count: int = 0
 
+    # CamelCase compatibility fields
+    recruiterId: Optional[str] = None
+    employmentType: Optional[str] = None
+    experienceRequired: Optional[str] = None
+    salaryRange: Optional[str] = None
+    requiredSkills: Optional[str] = None
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
+
+    @model_validator(mode='after')
+    def populate_camel_case_aliases(self):
+        if not self.recruiterId:
+            self.recruiterId = self.recruiter_id
+        if not self.employmentType:
+            self.employmentType = self.employment_type
+        if not self.experienceRequired:
+            self.experienceRequired = self.experience_level
+        if not self.salaryRange:
+            self.salaryRange = self.salary_range
+        if not self.requiredSkills:
+            self.requiredSkills = ", ".join(self.required_skills) if isinstance(self.required_skills, list) else (self.required_skills or "")
+        if not self.createdAt:
+            self.createdAt = self.created_at
+        if not self.updatedAt:
+            self.updatedAt = self.updated_at
+        return self
+
     class Config:
         from_attributes = True
 

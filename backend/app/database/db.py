@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 from app.utils.config import settings
@@ -10,7 +10,6 @@ database_url = (settings.DATABASE_URL or "").strip()
 
 
 if database_url:
-
     # PostgreSQL / Supabase
     if database_url.startswith("postgres://"):
         database_url = database_url.replace(
@@ -33,9 +32,18 @@ if database_url:
 
     print("[DB] Using PostgreSQL database")
 
-else:
+    # Test actual database connection
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
 
-    # Local development
+        print("[DB] PostgreSQL connection successful")
+
+    except Exception as e:
+        print(f"[DB] PostgreSQL connection failed: {e}")
+
+else:
+    # Local development fallback
     engine = create_engine(
         SQLITE_DATABASE_URL,
         connect_args={"check_same_thread": False},
