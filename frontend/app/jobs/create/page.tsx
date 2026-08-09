@@ -49,6 +49,7 @@ export default function CreateJobPage() {
       });
 
       showToast('success', 'Job Published!', 'New job requisition has been posted successfully.');
+      router.refresh();
       router.push('/jobs');
     } catch (err: unknown) {
       console.error('Error creating job:', err);

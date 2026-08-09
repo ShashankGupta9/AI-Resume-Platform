@@ -11,6 +11,7 @@ from app.utils.security import get_current_recruiter
 
 router = APIRouter(prefix="/api/resumes", tags=["Resumes"])
 
+
 @router.get("")
 def list_resumes(
     job_id: Optional[str] = None,
@@ -18,20 +19,20 @@ def list_resumes(
     db: Session = Depends(get_db),
     recruiter: Recruiter = Depends(get_current_recruiter)
 ):
-    query = db.query(Resume).join(Job).filter(Job.recruiterId == recruiter.id)
+    query = db.query(Resume).join(Job).filter(Job.recruiter_id == recruiter.id)
 
     if job_id and job_id != "All":
-        query = query.filter(Resume.jobId == job_id)
+        query = query.filter(Resume.job_id == job_id)
 
     if search:
         s = f"%{search}%"
         query = query.filter(
-            (Resume.candidateName.ilike(s)) |
+            (Resume.candidate_name.ilike(s)) |
             (Resume.email.ilike(s)) |
-            (Resume.extractedSkills.ilike(s))
+            (Resume.extracted_skills.ilike(s))
         )
 
-    resumes = query.order_by(Resume.uploadDate.desc()).all()
+    resumes = query.order_by(Resume.upload_date.desc()).all()
 
     result = []
     for r in resumes:
@@ -41,6 +42,7 @@ def list_resumes(
         result.append(r_data)
 
     return {"resumes": result}
+
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def upload_resume(
@@ -73,7 +75,7 @@ async def upload_resume(
         raise HTTPException(status_code=404, detail="Selected target job does not exist.")
 
     # Run AI Analysis
-    ai_result = analyze_resume_file(content, ext, job.requiredSkills, job.title)
+    ai_result = analyze_resume_file(content, ext, job.required_skills, job.title)
 
     final_name = candidateName.strip() if candidateName and candidateName.strip() else file_name.rsplit(".", 1)[0].replace("_", " ")
     final_email = email.strip() if email and email.strip() else (ai_result.get("extracted_email") or "applicant@example.com")
@@ -82,17 +84,17 @@ async def upload_resume(
     file_url = save_resume_file(content, file_name, file.content_type or "application/octet-stream")
 
     resume = Resume(
-        jobId=jobId,
-        candidateName=final_name,
+        job_id=jobId,
+        candidate_name=final_name,
         email=final_email,
         phone=final_phone,
-        fileUrl=file_url,
-        fileName=file_name,
-        fileType=ext,
-        rawText=ai_result["raw_text"],
-        aiMatchScore=ai_result["match_score"],
-        aiSummary=ai_result["summary"],
-        extractedSkills=json.dumps(ai_result["extracted_skills"]),
+        file_url=file_url,
+        file_name=file_name,
+        file_type=ext,
+        raw_text=ai_result["raw_text"],
+        ai_match_score=ai_result["match_score"],
+        ai_summary=ai_result["summary"],
+        extracted_skills=json.dumps(ai_result["extracted_skills"]),
         status="Submitted"
     )
     db.add(resume)
@@ -106,6 +108,7 @@ async def upload_resume(
         "message": "Resume uploaded and analyzed successfully",
         "resume": res_data
     }
+
 
 @router.delete("/{resume_id}")
 def delete_resume(resume_id: str, db: Session = Depends(get_db)):

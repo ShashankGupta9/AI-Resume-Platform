@@ -41,6 +41,7 @@ if database_url:
 
     except Exception as e:
         print(f"[DB] PostgreSQL connection failed: {e}")
+        raise
 
 else:
     # Local development fallback

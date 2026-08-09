@@ -1,4 +1,5 @@
 import re
+import json
 from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
@@ -111,6 +112,25 @@ class JobResponse(BaseModel):
     experience_level: Optional[str] = None
     required_skills: Optional[List[str]] = None
     created_at: Optional[datetime] = None
+    @field_validator('requiredSkills', mode='before')
+    @classmethod
+    def parse_required_skills_str(cls, v):
+        if isinstance(v, list):
+            return ", ".join(v)
+        return v or ""
+
+    @field_validator('required_skills', mode='before')
+    @classmethod
+    def parse_required_skills_list(cls, v):
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(item) for item in parsed]
+            except Exception:
+                pass
+            return [s.strip() for s in v.split(',') if s.strip()]
+        return v or []
 
     @model_validator(mode='after')
     def sync_aliases(self):

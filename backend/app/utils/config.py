@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str | None = None
 
-    JWT_SECRET: str = "ai-resume-platform-super-secret-jwt-key-2026"
+    JWT_SECRET: str 
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 

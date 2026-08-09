@@ -30,6 +30,7 @@ export default function CreateJobPage() {
     });
 
     if (created) {
+      router.refresh();
       router.push('/dashboard/jobs');
     }
   };

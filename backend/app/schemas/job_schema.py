@@ -1,3 +1,4 @@
+import json
 from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -87,6 +88,19 @@ class JobResponse(BaseModel):
     requiredSkills: Optional[str] = None
     createdAt: Optional[datetime] = None
     updatedAt: Optional[datetime] = None
+
+    @field_validator('required_skills', mode='before')
+    @classmethod
+    def parse_required_skills(cls, v):
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(item) for item in parsed]
+            except Exception:
+                pass
+            return [s.strip() for s in v.split(',') if s.strip()]
+        return v or []
 
     @model_validator(mode='after')
     def populate_camel_case_aliases(self):
