@@ -47,11 +47,11 @@ export interface JobCreateInput {
   location: string;
   employment_type: string;
   experience_level: string;
-  salary_min: number;
-  salary_max: number;
+  salary_min?: number;
+  salary_max?: number;
   description: string;
-  requirements: string;
-  required_skills: string[];
+  requirements?: string;
+  required_skills: string | string[];
   deadline?: string;
   status?: string;
   // Legacy camelCase support

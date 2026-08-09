@@ -23,29 +23,8 @@ import {
   List
 } from 'lucide-react';
 
-interface Job {
-  id: string;
-  title: string;
-  department: string;
-}
-
-interface Resume {
-  id: string;
-  jobId: string;
-  candidateName: string;
-  email: string;
-  phone: string;
-  fileUrl: string;
-  fileName: string;
-  fileType: string;
-  rawText?: string;
-  aiMatchScore: number;
-  aiSummary?: string;
-  extractedSkills: string;
-  status: string;
-  uploadDate: string;
-  job?: Job;
-}
+import { apiService } from '@/services/api';
+import { Job, Resume } from '@/types';
 
 function ResumesContent() {
   const searchParams = useSearchParams();
@@ -71,20 +50,12 @@ function ResumesContent() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resumesRes, jobsRes] = await Promise.all([
-        fetch('/api/resumes'),
-        fetch('/api/jobs')
+      const [resumesList, jobsList] = await Promise.all([
+        apiService.getResumes(),
+        apiService.getJobs()
       ]);
-
-      if (resumesRes.ok) {
-        const resumesData = await resumesRes.json();
-        setResumes(resumesData.resumes || []);
-      }
-
-      if (jobsRes.ok) {
-        const jobsData = await jobsRes.json();
-        setJobs(jobsData.jobs || []);
-      }
+      setResumes(resumesList || []);
+      setJobs(jobsList || []);
     } catch (err) {
       console.error('Error fetching resumes:', err);
     } finally {
@@ -96,16 +67,13 @@ function ResumesContent() {
     if (!confirm(`Are you sure you want to delete the resume for ${name}?`)) return;
 
     try {
-      const res = await fetch(`/api/resumes/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        showToast('success', 'Resume Deleted', `Removed candidate record for ${name}.`);
-        setResumes((prev) => prev.filter((r) => r.id !== id));
-        if (selectedResume?.id === id) setSelectedResume(null);
-      } else {
-        showToast('error', 'Delete Failed', 'Could not delete resume record.');
-      }
+      await apiService.deleteResume(id);
+      showToast('success', 'Resume Deleted', `Removed candidate record for ${name}.`);
+      setResumes((prev) => prev.filter((r) => r.id !== id));
+      if (selectedResume?.id === id) setSelectedResume(null);
     } catch (err) {
       console.error('Error deleting resume:', err);
+      showToast('error', 'Delete Failed', 'Could not delete resume record.');
     }
   };
 

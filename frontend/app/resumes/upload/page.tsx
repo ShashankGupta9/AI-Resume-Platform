@@ -17,12 +17,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-interface Job {
-  id: string;
-  title: string;
-  department: string;
-  requiredSkills: string;
-}
+import { apiService } from '@/services/api';
+import { Job } from '@/types';
 
 function UploadResumeContent() {
   const searchParams = useSearchParams();
@@ -42,7 +38,7 @@ function UploadResumeContent() {
   const [uploadSuccessResult, setUploadSuccessResult] = useState<{
     candidateName: string;
     aiMatchScore: number;
-    aiSummary: string;
+    aiSummary?: string;
   } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,13 +50,10 @@ function UploadResumeContent() {
 
   const fetchJobs = async () => {
     try {
-      const res = await fetch('/api/jobs');
-      if (res.ok) {
-        const data = await res.json();
-        setJobs(data.jobs || []);
-        if (!selectedJobId && data.jobs && data.jobs.length > 0) {
-          setSelectedJobId(data.jobs[0].id);
-        }
+      const jobList = await apiService.getJobs();
+      setJobs(jobList || []);
+      if (!selectedJobId && jobList && jobList.length > 0) {
+        setSelectedJobId(jobList[0].id);
       }
     } catch (err) {
       console.error('Error loading jobs:', err);
@@ -121,23 +114,14 @@ function UploadResumeContent() {
       formData.append('email', email);
       formData.append('phone', phone);
 
-      const res = await fetch('/api/resumes', {
-        method: 'POST',
-        body: formData,
-      });
+      const result = await apiService.uploadResume(formData);
 
-      const data = await res.json();
-      if (!res.ok) {
-        showToast('error', 'Upload Failed', data.error || 'Failed to process resume file.');
-        setIsUploading(false);
-        return;
-      }
-
-      showToast('success', 'Resume Analyzed!', `AI Match Score: ${data.resume.aiMatchScore}%`);
-      setUploadSuccessResult(data.resume);
-    } catch (err) {
+      showToast('success', 'Resume Analyzed!', `AI Match Score: ${result.resume.aiMatchScore}%`);
+      setUploadSuccessResult(result.resume);
+    } catch (err: unknown) {
       console.error('Error uploading resume:', err);
-      showToast('error', 'Network Error', 'An unexpected error occurred during file upload.');
+      const msg = err instanceof Error ? err.message : 'An unexpected error occurred during file upload.';
+      showToast('error', 'Upload Failed', msg);
     } finally {
       setIsUploading(false);
     }

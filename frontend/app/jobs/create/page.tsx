@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useToast } from '@/components/ui/Toast';
 import { Briefcase, Building2, MapPin, DollarSign, Calendar, Sparkles, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
+import { jobApi } from '@/services/jobApi';
+
 export default function CreateJobPage() {
   const router = useRouter();
   const { showToast } = useToast();
@@ -31,34 +33,28 @@ export default function CreateJobPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          department,
-          location,
-          employmentType,
-          experienceRequired,
-          salaryRange,
-          description,
-          requiredSkills,
-          deadline,
-        }),
+      await jobApi.createJob({
+        title,
+        department,
+        location,
+        employment_type: employmentType,
+        experience_level: experienceRequired,
+        salary_min: 130000,
+        salary_max: 160000,
+        salaryRange,
+        description,
+        requirements: description,
+        required_skills: requiredSkills,
+        deadline,
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        showToast('error', 'Job Creation Failed', data.error || 'Could not publish job posting.');
-        setIsSubmitting(false);
-        return;
-      }
 
       showToast('success', 'Job Published!', 'New job requisition has been posted successfully.');
       router.push('/jobs');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error creating job:', err);
-      showToast('error', 'Server Error', 'Failed to submit job posting.');
+      const msg = err instanceof Error ? err.message : 'Could not publish job posting.';
+      showToast('error', 'Job Creation Failed', msg);
+    } finally {
       setIsSubmitting(false);
     }
   };

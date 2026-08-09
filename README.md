@@ -118,43 +118,47 @@ The **AI Resume Platform** automates candidate evaluation by combining:
 ## 📁 Directory Structure
 
 ```
-AI_resume/
+AI-Resume-Platform/
 ├── backend/                    # FastAPI Backend Application
 │   ├── app/
 │   │   ├── api/                # REST Endpoint Controllers (auth, jobs, resumes)
-│   │   ├── database/           # DB Connection, Session, and Auto-Migration
+│   │   ├── database/           # DB Connection & Session (PostgreSQL / SQLite)
 │   │   ├── models/             # SQLAlchemy Database Models (Recruiter, Job, Resume)
 │   │   ├── schemas/            # Pydantic Schemas (Request/Response contracts)
 │   │   ├── services/           # Business Logic (AI Matcher, Job, Auth, Storage)
-│   │   ├── utils/              # Security Dependencies & JWT verification
+│   │   ├── utils/              # Security & Settings Configurations
 │   │   └── main.py             # Application Entry Point & CORS Setup
-│   └── requirements.txt        # Python Dependencies
+│   ├── .env                    # Local Backend Environment Variables
+│   ├── .env.example            # Environment Template for Backend
+│   ├── requirements.txt        # Python Dependencies
+│   └── resume_ai.db            # Local Development SQLite Database
 │
 ├── frontend/                   # Next.js 14 Web Application
-│   ├── app/                    # Next.js App Router Pages & API Routes
-│   │   ├── (auth)/             # Login & Registration Pages
-│   │   ├── dashboard/          # Analytics & Job Management Views
-│   │   ├── jobs/               # Public Job List & Application Pages
-│   │   ├── resumes/            # Candidate Resume Table & Upload Component
-│   │   └── profile/            # Recruiter Profile & Settings
+│   ├── app/                    # Next.js App Router Pages ((auth), dashboard, jobs, resumes)
 │   ├── components/             # Reusable UI & Layout Components
 │   ├── context/                # Auth & Global Application Context
 │   ├── hooks/                  # Custom React Hooks (useJobs, useAuth, useToast)
-│   ├── lib/                    # Validation Schemas (Zod) & DB Helper Utilities
-│   ├── services/               # API Service Layer (jobApi, authApi)
-│   └── types/                  # TypeScript Interfaces
+│   ├── lib/                    # Validation Schemas (Zod) & Client Utilities
+│   ├── public/                 # Static Assets
+│   ├── services/               # API Service Layer (apiService, jobApi)
+│   ├── types/                  # TypeScript Interfaces
+│   ├── .env.local              # Local Frontend Environment Variables
+│   ├── next.config.mjs         # Next.js Configuration
+│   ├── package.json            # Frontend NPM Dependencies
+│   └── tsconfig.json           # TypeScript Configuration
 │
 ├── docker/                     # Container Configurations
-│   ├── Dockerfile.backend      # Python 3.10 Container Build
+│   ├── Dockerfile.backend      # Python Container Build
 │   ├── Dockerfile.frontend     # Node.js Next.js Container Build
 │   └── docker-compose.yml      # Multi-Container Orchestration
 │
 ├── docs/                       # Platform Documentation
-│   ├── api_reference.md        # Comprehensive API Specs
+│   ├── api.md                  # REST API Specification
 │   └── architecture.md         # System Architecture Reference
 │
-├── .env.example                # Environment Variable Template
-└── README.md                   # Project Documentation
+├── .env.example                # Root Environment Template
+├── .gitignore                  # Git Ignore Rules
+└── README.md                   # Project Overview & Setup Guide
 ```
 
 ---

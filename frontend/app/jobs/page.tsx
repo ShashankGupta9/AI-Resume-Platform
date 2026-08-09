@@ -14,21 +14,8 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 
-interface Job {
-  id: string;
-  title: string;
-  department: string;
-  location: string;
-  employmentType: string;
-  experienceRequired: string;
-  salaryRange: string;
-  description: string;
-  requiredSkills: string;
-  deadline: string;
-  status: string;
-  createdAt: string;
-  _count?: { resumes: number };
-}
+import { jobApi } from '@/services/jobApi';
+import { Job } from '@/types';
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -44,11 +31,8 @@ export default function JobsPage() {
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/jobs');
-      if (res.ok) {
-        const data = await res.json();
-        setJobs(data.jobs || []);
-      }
+      const data = await jobApi.getJobs();
+      setJobs(data.jobs || []);
     } catch (err) {
       console.error('Error fetching jobs:', err);
     } finally {
@@ -57,13 +41,17 @@ export default function JobsPage() {
   };
 
   const filteredJobs = jobs.filter((job) => {
+    const rawSkills = job.requiredSkills || job.required_skills;
+    const skillsStr = Array.isArray(rawSkills) ? rawSkills.join(', ') : (rawSkills || '');
+    const empType = job.employmentType || job.employment_type || '';
+
     const matchesSearch =
       job.title.toLowerCase().includes(search.toLowerCase()) ||
-      job.requiredSkills.toLowerCase().includes(search.toLowerCase()) ||
+      skillsStr.toLowerCase().includes(search.toLowerCase()) ||
       job.location.toLowerCase().includes(search.toLowerCase());
 
     const matchesDept = departmentFilter === 'All' || job.department === departmentFilter;
-    const matchesType = typeFilter === 'All' || job.employmentType === typeFilter;
+    const matchesType = typeFilter === 'All' || empType === typeFilter;
 
     return matchesSearch && matchesDept && matchesType;
   });
@@ -164,9 +152,14 @@ export default function JobsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredJobs.map((job) => {
-            const skillList = job.requiredSkills
-              ? job.requiredSkills.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
+            const rawSkills = job.requiredSkills || job.required_skills;
+            const skillList = Array.isArray(rawSkills)
+              ? rawSkills
+              : rawSkills
+              ? rawSkills.split(/[,;]/).map((s) => s.trim()).filter(Boolean)
               : [];
+            const empType = job.employmentType || job.employment_type || 'Full-Time';
+            const salRange = job.salaryRange || job.salary_range || (job.salary_min && job.salary_max ? `$${job.salary_min} - $${job.salary_max}` : 'Competitive');
 
             return (
               <div
@@ -200,9 +193,9 @@ export default function JobsPage() {
                       {job.location}
                     </span>
                     <span>•</span>
-                    <span>{job.employmentType}</span>
+                    <span>{empType}</span>
                     <span>•</span>
-                    <span className="font-semibold text-slate-200">{job.salaryRange}</span>
+                    <span className="font-semibold text-slate-200">{salRange}</span>
                   </div>
 
                   {/* Skills tags */}

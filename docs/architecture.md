@@ -36,7 +36,7 @@ AI_resume/
 │
 └── docs/                 # Platform Documentation
     ├── architecture.md
-    └── api_reference.md
+    └── api.md
 ```
 
 ---
