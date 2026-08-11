@@ -31,31 +31,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   });
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] bg-slate-950 text-slate-100">
+    <div className="flex min-h-[calc(100vh-5rem)] bg-[#0B0501] text-white">
       {/* Collapsible Sidebar */}
       <Sidebar />
 
       {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header / Breadcrumbs Bar */}
-        <header className="px-4 sm:px-6 lg:px-8 py-3.5 border-b border-slate-800 bg-slate-950/60 backdrop-blur-md flex items-center justify-between gap-4">
+        <header className="px-4 sm:px-6 lg:px-8 py-3.5 border-b border-[#FF6803]/15 bg-[#0B0501]/70 backdrop-blur-md flex items-center justify-between gap-4">
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-1.5 text-xs text-slate-400 overflow-x-auto">
+          <nav className="flex items-center gap-1.5 text-xs text-[#BFBFBF] overflow-x-auto">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 hover:text-slate-200 transition-colors"
+              className="flex items-center gap-1 hover:text-white transition-colors"
             >
-              <Home className="w-3.5 h-3.5 text-indigo-400" />
+              <Home className="w-3.5 h-3.5 text-[#FF6803]" />
             </Link>
             {breadcrumbs.map((crumb, idx) => {
               const isLast = idx === breadcrumbs.length - 1;
               return (
                 <React.Fragment key={crumb.href}>
-                  <ChevronRight className="w-3 h-3 text-slate-600 shrink-0" />
+                  <ChevronRight className="w-3 h-3 text-[#BFBFBF]/40 shrink-0" />
                   {isLast ? (
-                    <span className="font-semibold text-slate-200 truncate">{crumb.name}</span>
+                    <span className="font-semibold text-white truncate">{crumb.name}</span>
                   ) : (
-                    <Link href={crumb.href} className="hover:text-slate-200 transition-colors truncate">
+                    <Link href={crumb.href} className="hover:text-white transition-colors truncate">
                       {crumb.name}
                     </Link>
                   )}
@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/dashboard/jobs/create"
-              className="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-500/20 flex items-center gap-1.5 transition-all transform active:scale-95"
+              className="btn-primary px-4 py-2 text-xs flex items-center gap-1.5"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">New Requisition</span>
